@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+        <meta charset="UTF-8">
+        <title>RecShop Admin</title>
+        <meta name="viewport" content="width=device-width,initial-scale=1" />
+        <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen">
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-800 border-r border-slate-700 min-h-screen p-6">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-white">RecShop</h1>
+                <div class="text-sm text-slate-300">Admin Panel</div>
+            </div>
+            <nav class="space-y-2">
+                <a href="#dashboard" class="block px-3 py-2 rounded hover:bg-slate-700">Dashboard</a>
+                <a href="#products" class="block px-3 py-2 rounded bg-slate-700">Products</a>
+                <a href="#orders" class="block px-3 py-2 rounded hover:bg-slate-700">Orders</a>
+                <a href="#users" class="block px-3 py-2 rounded hover:bg-slate-700">Users</a>
+                <a href="#settings" class="block px-3 py-2 rounded hover:bg-slate-700">Settings</a>
+            </nav>
+        </aside>
+
+        <!-- Main -->
+        <main class="flex-1 p-8">
+            <!-- Header -->
+            <header class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <h2 class="text-2xl font-semibold">Dashboard</h2>
+                    <div class="text-sm text-slate-400">Manage products, orders and users</div>
+                </div>
+                <div class="flex items-center gap-4">
+                        <select id="category-select" class="bg-slate-800 px-3 py-2 rounded outline-none text-sm">
+                            <option value="games">🎮 Premium PC Games</option>
+                            <option value="wallet">💳 Steam Wallet Cards</option>
+                            <option value="keys">🔑 Random Steam Keys</option>
+                        </select>
+                        <input id="global-search" type="search" placeholder="Search products..." class="bg-slate-800 px-3 py-2 rounded w-64 outline-none" />
+                        <div class="flex items-center gap-3">
+            
+                        <div class="text-sm text-slate-300">Admin</div>
+                        <div class="w-8 h-8 bg-slate-700 rounded-full"></div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Stats -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-slate-800 p-4 rounded">
+                    <div class="text-sm text-slate-400">Total Products</div>
+                    <div id="stat-products" class="text-2xl font-bold">0</div>
+                </div>
+                <div class="bg-slate-800 p-4 rounded">
+                    <div class="text-sm text-slate-400">Total Value (TK)</div>
+                    <div id="stat-value" class="text-2xl font-bold">0</div>
+                </div>
+                <div class="bg-slate-800 p-4 rounded">
+                    <div class="text-sm text-slate-400">Recent Activity</div>
+                    <div id="stat-activity" class="text-2xl font-bold">—</div>
+                </div>
+            </section>
+
+            <!-- Orders section -->
+            <section id="orders" class="bg-slate-800 p-6 rounded mt-8">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold">Orders</h3>
+                    <div class="flex items-center gap-2">
+                        <button id="orders-export" class="bg-slate-700 px-4 py-2 rounded hover:bg-slate-600">Export</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto bg-slate-900 p-3 rounded">
+                    <table class="w-full text-left table-auto">
+                        <thead class="text-slate-300 text-sm">
+                            <tr>
+                                <th class="px-3 py-2">#</th>
+                                <th class="px-3 py-2">Category</th>
+                                <th class="px-3 py-2">Product</th>
+                                <th class="px-3 py-2">Price</th>
+                                <th class="px-3 py-2">Buyer</th>
+                                <th class="px-3 py-2">Phone</th>
+                                <th class="px-3 py-2">Payment</th>
+                                <th class="px-3 py-2">Status</th>
+                                <th class="px-3 py-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table" class="text-slate-200"></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Products section -->
+            <section id="products" class="bg-slate-800 p-6 rounded">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-xl font-semibold">Products</h3>
+                    <div class="flex items-center gap-2">
+                        <button id="btn-add" class="bg-green-600 px-4 py-2 rounded hover:bg-green-500">Add Product</button>
+                        <button id="btn-export" class="bg-slate-700 px-4 py-2 rounded hover:bg-slate-600">Export</button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto bg-slate-900 p-3 rounded">
+                    <table class="w-full text-left table-auto">
+                        <thead class="text-slate-300 text-sm">
+                            <tr>
+                                <th class="px-3 py-2">#</th>
+                                <th class="px-3 py-2">Name</th>
+                                <th class="px-3 py-2">Price (TK)</th>
+                                <th class="px-3 py-2">Description</th>
+                                <th class="px-3 py-2">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="products-table" class="text-slate-200"></tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal (Add/Edit) -->
+    <div id="modal" class="fixed inset-0 bg-black/50 hidden items-center justify-center">
+        <div class="bg-slate-800 p-6 rounded w-full max-w-xl">
+            <h4 id="modal-title" class="text-lg font-semibold mb-3">Add Product</h4>
+            <div class="space-y-3">
+                <input id="p-name" type="text" placeholder="Product name" class="w-full bg-slate-700 p-3 rounded outline-none" />
+                <input id="p-price" type="number" placeholder="Price (TK)" class="w-full bg-slate-700 p-3 rounded outline-none" />
+                <textarea id="p-desc" placeholder="Description" class="w-full bg-slate-700 p-3 rounded outline-none"></textarea>
+            </div>
+            <div class="mt-4 flex justify-end gap-2">
+                <button id="modal-cancel" class="px-4 py-2 rounded bg-slate-700">Cancel</button>
+                <button id="modal-save" class="px-4 py-2 rounded bg-green-600">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Category-aware product management using localStorage keys matching index.html
+        const CATEGORY_KEYS = { wallet: 'recshop_wallet', games: 'recshop_games', keys: 'recshop_keys' };
+        let currentCategory = 'games';
+        let products = [];
+        let editIndex = -1;
+
+        // Elements
+        const table = document.getElementById('products-table');
+        const statProducts = document.getElementById('stat-products');
+        const statValue = document.getElementById('stat-value');
+        const statActivity = document.getElementById('stat-activity');
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const btnAdd = document.getElementById('btn-add');
+        const btnExport = document.getElementById('btn-export');
+        const inputName = document.getElementById('p-name');
+        const inputPrice = document.getElementById('p-price');
+        const inputDesc = document.getElementById('p-desc');
+        const modalSave = document.getElementById('modal-save');
+        const modalCancel = document.getElementById('modal-cancel');
+        const searchInput = document.getElementById('global-search');
+        const categorySelect = document.getElementById('category-select');
+
+        function refreshStats() {
+            statProducts.textContent = products.length;
+            const total = products.reduce((s,p)=>s + (Number(p.price)||0),0);
+            statValue.textContent = total;
+            statActivity.textContent = products.length ? 'Updated' : 'No products';
+        }
+
+        function renderTable(filter=''){
+            table.innerHTML = '';
+            // Keep original product indexes so edit/delete refer to correct item even when filtered
+            const mapped = products.map((p, idx) => ({ p, idx }));
+            const filtered = mapped.filter(item => item.p.name.toLowerCase().includes(filter.toLowerCase()));
+            filtered.forEach((item, displayIndex) => {
+                const p = item.p;
+                const originalIndex = item.idx;
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-3 py-2 align-top">${displayIndex+1}</td>
+                    <td class="px-3 py-2 align-top">${escapeHtml(p.name)}</td>
+                    <td class="px-3 py-2 align-top">${escapeHtml(p.price)}</td>
+                    <td class="px-3 py-2 align-top">${escapeHtml(p.desc || '')}</td>
+                    <td class="px-3 py-2 align-top">
+                        <button class="text-sm text-blue-400 mr-2" onclick="onEdit(${originalIndex})">Edit</button>
+                        <button class="text-sm text-red-400" onclick="onDelete(${originalIndex})">Delete</button>
+                    </td>
+                `;
+                table.appendChild(tr);
+            });
+        }
+
+        function loadProductsForCategory(cat){
+            currentCategory = cat;
+            products = JSON.parse(localStorage.getItem(CATEGORY_KEYS[cat]) || '[]');
+            refreshStats();
+            renderTable(searchInput.value || '');
+        }
+
+        function saveProducts(){
+            localStorage.setItem(CATEGORY_KEYS[currentCategory], JSON.stringify(products));
+            refreshStats();
+            renderTable(searchInput.value || '');
+        }
+
+        function openModal(title){
+            modalTitle.textContent = title;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeModal(){
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+            editIndex = -1;
+            inputName.value = '';
+            inputPrice.value = '';
+            inputDesc.value = '';
+        }
+
+        btnAdd.addEventListener('click', ()=>{ openModal('Add Product'); });
+        modalCancel.addEventListener('click', closeModal);
+
+        modalSave.addEventListener('click', ()=>{
+            const name = inputName.value.trim();
+            const price = Number(inputPrice.value) || 0;
+            const desc = inputDesc.value.trim();
+            if(!name){ alert('Name required'); return; }
+
+            if(editIndex >= 0){
+                products[editIndex] = { name, price, desc };
+            } else {
+                products.push({ name, price, desc });
+            }
+            saveProducts();
+            closeModal();
+        });
+
+        function onEdit(i){
+            editIndex = i;
+            const p = products[i];
+            inputName.value = p.name;
+            inputPrice.value = p.price;
+            inputDesc.value = p.desc || '';
+            openModal('Edit Product');
+        }
+
+        function onDelete(i){
+            if(!confirm('Delete this product?')) return;
+            products.splice(i,1);
+            saveProducts();
+        }
+
+        btnExport.addEventListener('click', ()=>{
+            const blob = new Blob([JSON.stringify(products, null, 2)], {type:'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `${CATEGORY_KEYS[currentCategory]}.json`;
+            a.click(); URL.revokeObjectURL(url);
+        });
+
+        searchInput.addEventListener('input', (e)=> renderTable(e.target.value));
+        categorySelect.addEventListener('change', (e)=> loadProductsForCategory(e.target.value));
+
+        function escapeHtml(s){ return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;'); }
+
+        // initial render (default category)
+        categorySelect.value = currentCategory;
+        loadProductsForCategory(currentCategory);
+        window.onEdit = onEdit; window.onDelete = onDelete;
+
+        // Orders management
+        const ORDERS_KEY = 'recshop_purchases';
+        const ordersTable = document.getElementById('orders-table');
+        const ordersExport = document.getElementById('orders-export');
+
+        function loadOrders(){
+            const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+            ordersTable.innerHTML = '';
+            orders.forEach((o,i)=>{
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="px-3 py-2 align-top">${i+1}</td>
+                    <td class="px-3 py-2 align-top">${escapeHtml(o.category)}</td>
+                    <td class="px-3 py-2 align-top">${escapeHtml(o.name)}</td>
+                    <td class="px-3 py-2 align-top">${escapeHtml(o.price)}</td>
+                    <td class="px-3 py-2 align-top">${escapeHtml(o.buyer)}</td>
+                    <td class="px-3 py-2 align-top">${escapeHtml(o.phone)}</td>
+                    <td class="px-3 py-2 align-top">${escapeHtml(o.payment)}</td>
+                    <td class="px-3 py-2 align-top">${escapeHtml(o.status || '')}</td>
+                    <td class="px-3 py-2 align-top">
+                        <button class="text-sm text-green-400 mr-2" onclick="markFulfilled(${o.id})">Mark Fulfilled</button>
+                        <button class="text-sm text-red-400" onclick="deleteOrder(${o.id})">Delete</button>
+                    </td>
+                `;
+                ordersTable.appendChild(tr);
+            });
+        }
+
+        function markFulfilled(id){
+            const orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+            const idx = orders.findIndex(o=>o.id===id);
+            if(idx===-1) return alert('Order not found');
+            orders[idx].status = 'fulfilled';
+            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+            loadOrders();
+        }
+
+        function deleteOrder(id){
+            if(!confirm('Delete this order?')) return;
+            let orders = JSON.parse(localStorage.getItem(ORDERS_KEY) || '[]');
+            orders = orders.filter(o=>o.id!==id);
+            localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+            loadOrders();
+        }
+
+        ordersExport.addEventListener('click', ()=>{
+            const data = localStorage.getItem(ORDERS_KEY) || '[]';
+            const blob = new Blob([data], {type:'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'recshop_purchases.json'; a.click(); URL.revokeObjectURL(url);
+        });
+
+        window.markFulfilled = markFulfilled; window.deleteOrder = deleteOrder;
+        loadOrders();
+    </script>
+</body>
+</html>

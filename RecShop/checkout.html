@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Checkout — RECSHOP</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>body{background:#0b0d11;color:#fff;font-family:Inter,system-ui;}</style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+  <main class="w-full max-w-2xl bg-[#0f1519] border border-white/5 rounded-2xl p-8">
+    <h1 class="text-2xl font-bold mb-4">Checkout</h1>
+    <div id="product-info" class="mb-6 bg-slate-900 p-4 rounded"></div>
+
+    <form id="checkout-form" class="space-y-4">
+      <div>
+        <label class="text-sm text-slate-300">Your name</label>
+        <input id="buyer-name" class="w-full mt-1 p-3 rounded bg-slate-800 outline-none" required />
+      </div>
+      <div>
+        <label class="text-sm text-slate-300">Phone (WhatsApp)</label>
+        <input id="buyer-phone" class="w-full mt-1 p-3 rounded bg-slate-800 outline-none" required />
+      </div>
+      <div>
+        <label class="text-sm text-slate-300">Email (optional)</label>
+        <input id="buyer-email" class="w-full mt-1 p-3 rounded bg-slate-800 outline-none" />
+      </div>
+      <div>
+        <label class="text-sm text-slate-300">Payment method</label>
+        <select id="payment-method" class="w-full mt-1 p-3 rounded bg-slate-800 outline-none">
+          <option value="whatsapp">WhatsApp (confirm via support)</option>
+          <option value="bkash">bKash</option>
+          <option value="nagad">Nagad</option>
+        </select>
+      </div>
+
+      <div class="flex items-center justify-between">
+        <button type="submit" class="bg-green-600 px-6 py-3 rounded font-bold">Confirm Purchase</button>
+        <a href="index.html" class="text-slate-400 hover:text-white">Cancel</a>
+      </div>
+    </form>
+
+    <div id="confirmation" class="hidden mt-6 p-4 bg-slate-800 rounded"></div>
+  </main>
+
+  <script>
+    // Read query params
+    function qs(name){const params=new URLSearchParams(location.search);return params.get(name)||''}
+    const category=qs('category');
+    const name=qs('name');
+    const price=qs('price');
+
+    const productInfo = document.getElementById('product-info');
+    productInfo.innerHTML = `<div class="font-bold text-lg">${escapeHtml(name||'Product')}</div><div class="text-slate-400">Category: ${escapeHtml(category||'')}</div><div class="text-2xl font-black mt-2">${escapeHtml(price||'0')} TK</div>`;
+
+    const form = document.getElementById('checkout-form');
+    form.addEventListener('submit', (e)=>{
+      e.preventDefault();
+      const buyer = document.getElementById('buyer-name').value.trim();
+      const phone = document.getElementById('buyer-phone').value.trim();
+      const email = document.getElementById('buyer-email').value.trim();
+      const payment = document.getElementById('payment-method').value;
+      if(!buyer||!phone){ alert('Name and phone are required'); return; }
+
+      const purchases = JSON.parse(localStorage.getItem('recshop_purchases')||'[]');
+      const order = {
+        id: Date.now(),
+        category: category || 'unknown',
+        name: name || 'Unknown',
+        price: Number(price) || 0,
+        buyer, phone, email, payment,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
+      purchases.unshift(order);
+      localStorage.setItem('recshop_purchases', JSON.stringify(purchases));
+
+      document.getElementById('confirmation').classList.remove('hidden');
+      document.getElementById('confirmation').innerHTML = `<div class="text-green-400 font-bold">Purchase recorded.</div><div class="text-slate-300 text-sm mt-2">Order ID: ${order.id}</div><div class="mt-3"><a href=\"admin.html#orders\" class=\"text-[#00D1FF] font-bold\">View in admin panel →</a></div>`;
+      form.reset();
+    });
+
+    function escapeHtml(s){return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;')}
+  </script>
+</body>
+</html>
